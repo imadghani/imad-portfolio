@@ -50,7 +50,8 @@ check_venv() {
 # Function to install dependencies
 install_dependencies() {
     print_status "Installing pipeline monitor dependencies..."
-    pip install -q streamlit==1.41.0 pandas==2.1.4 numpy==1.24.3
+    pip install -q setuptools wheel
+    pip install -q streamlit==1.41.0 pandas==2.1.4 numpy==1.26.0
     print_status "Dependencies installed successfully!"
 }
 

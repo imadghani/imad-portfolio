@@ -28,31 +28,27 @@ export PYTHONPATH="$PROJECT_ROOT:$PYTHONPATH"
 echo -e "${YELLOW}📦 Activating virtual environment...${NC}"
 source "$VENV_PATH/bin/activate"
 
+# Ensure AIRFLOW_HOME is set correctly for all commands
+export AIRFLOW_HOME="$AIRFLOW_HOME"
+echo -e "${BLUE}🏠 AIRFLOW_HOME set to: $AIRFLOW_HOME${NC}"
+
 # Check if database is initialized
 if [ ! -f "$AIRFLOW_HOME/airflow.db" ]; then
     echo -e "${YELLOW}🔧 Initializing Airflow database...${NC}"
     airflow db init
 fi
 
-# Check if admin user exists
-if ! airflow users list 2>/dev/null | grep -q "admin"; then
-    echo -e "${YELLOW}👤 Creating admin user...${NC}"
-    airflow users create \
-        --username admin \
-        --firstname Admin \
-        --lastname User \
-        --role Admin \
-        --email admin@example.com \
-        --password admin
-fi
+# For Airflow 2.10.5, use standalone mode for development
+# This automatically creates admin user and handles auth
 
 echo -e "${GREEN}✅ Environment setup complete!${NC}"
 echo ""
 echo "Available commands:"
-echo "  1. Start webserver: airflow webserver --port 8080"
-echo "  2. Start scheduler: airflow scheduler"
-echo "  3. List DAGs: airflow dags list"
-echo "  4. Test DAG: airflow dags test titanic_dbt_pipeline"
+echo "  1. Start standalone (recommended): airflow standalone"
+echo "  2. Start webserver: airflow webserver --port 8080"
+echo "  3. Start scheduler: airflow scheduler"
+echo "  4. List DAGs: airflow dags list"
+echo "  5. Test DAG: airflow dags test titanic_dbt_pipeline"
 echo ""
 echo -e "${BLUE}🌐 Airflow UI will be available at: http://localhost:8080${NC}"
 echo -e "${BLUE}🔐 Login credentials: admin / admin${NC}"
@@ -91,9 +87,21 @@ start_services() {
     wait
 }
 
+# Function to start standalone mode (recommended for development)
+start_standalone() {
+    echo -e "${YELLOW}🚀 Starting Airflow in standalone mode...${NC}"
+    echo -e "${YELLOW}📝 This automatically creates admin user and handles configuration${NC}"
+    echo -e "${BLUE}🌐 Airflow UI will be available at: http://localhost:8080${NC}"
+    echo -e "${BLUE}🔐 Login credentials will be displayed below${NC}"
+    echo ""
+    airflow standalone
+}
+
 # Check command line arguments
 if [ "$1" = "start" ]; then
     start_services
+elif [ "$1" = "standalone" ]; then
+    start_standalone
 elif [ "$1" = "webserver" ]; then
     echo -e "${YELLOW}🌐 Starting webserver only...${NC}"
     airflow webserver --port 8080
@@ -104,15 +112,18 @@ elif [ "$1" = "test" ]; then
     echo -e "${YELLOW}🧪 Testing DAG...${NC}"
     airflow dags test titanic_dbt_pipeline
 else
-    echo "Usage: $0 [start|webserver|scheduler|test]"
+    echo "Usage: $0 [standalone|start|webserver|scheduler|test]"
     echo ""
     echo "Commands:"
-    echo "  start     - Start both webserver and scheduler"
-    echo "  webserver - Start webserver only"
-    echo "  scheduler - Start scheduler only"
-    echo "  test      - Test the DAG"
+    echo "  standalone - Start Airflow in standalone mode (recommended for development)"
+    echo "  start      - Start both webserver and scheduler"
+    echo "  webserver  - Start webserver only"
+    echo "  scheduler  - Start scheduler only"
+    echo "  test       - Test the DAG"
     echo ""
+    echo "For development, use: ./start_airflow.sh standalone"
     echo "Or run individual commands manually:"
+    echo "  airflow standalone"
     echo "  airflow webserver --port 8080"
     echo "  airflow scheduler"
 fi 

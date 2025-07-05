@@ -50,8 +50,9 @@ check_venv() {
 # Function to install dependencies
 install_dependencies() {
     print_status "Installing dashboard dependencies..."
+    pip install -q setuptools wheel
     pip install -q streamlit==1.41.0 plotly==5.24.1 seaborn==0.13.2 matplotlib==3.10.3
-    pip install -q google-cloud-bigquery==3.14.1 pandas==2.1.4 numpy==1.24.3
+    pip install -q google-cloud-bigquery==3.14.1 pandas==2.1.4 numpy==1.26.0
     print_status "Dependencies installed successfully!"
 }
 
