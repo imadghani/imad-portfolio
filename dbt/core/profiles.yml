@@ -1,0 +1,14 @@
+core:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: service-account
+      project: imad-455517
+      dataset: prototype_data
+      threads: 4
+      keyfile: /Users/imadghani/GitHub/imad-portfolio/secrets/bigquery-service-account.json
+      location: US
+      timeout_seconds: 300
+      priority: interactive
+      retries: 1 
