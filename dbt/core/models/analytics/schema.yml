@@ -1,0 +1,194 @@
+version: 2
+
+models:
+  - name: survival_analysis
+    description: "Pre-aggregated survival statistics and analytics across various passenger dimensions"
+    meta:
+      owner: "data-engineering-team"
+      priority: "high"
+      refresh_frequency: "daily"
+      business_logic: "Aggregates survival rates by passenger demographics for analytical insights"
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "total_passengers > 0"
+          config:
+            severity: error
+      - dbt_utils.expression_is_true:
+          expression: "survival_rate_pct >= 0 AND survival_rate_pct <= 100"
+          config:
+            severity: error
+    columns:
+      - name: class_name
+        description: "Passenger class (First Class, Second Class, Third Class)"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['First Class', 'Second Class', 'Third Class']
+      - name: gender
+        description: "Passenger gender"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['male', 'female']
+      - name: age_group
+        description: "Age group categorization (Child, Adult, Senior)"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Child', 'Adult', 'Senior', 'Unknown']
+      - name: port_name
+        description: "Port where passenger boarded"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Cherbourg', 'Queenstown', 'Southampton', 'Unknown']
+      - name: deck_name
+        description: "Name and description of the deck"
+      - name: total_passengers
+        description: "Total number of passengers in this segment"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 1
+              max_value: 1000
+              inclusive: true
+      - name: survivors
+        description: "Number of survivors in this segment"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1000
+              inclusive: true
+      - name: survival_rate_pct
+        description: "Survival rate as percentage (0% to 100%)"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 100
+              inclusive: true
+      - name: avg_fare
+        description: "Average fare paid by passengers in this segment"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1000
+              inclusive: true
+      - name: min_fare
+        description: "Minimum fare in this segment"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1000
+              inclusive: true
+      - name: max_fare
+        description: "Maximum fare in this segment"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1000
+              inclusive: true
+      - name: avg_family_size
+        description: "Average family size in this segment"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 1.0
+              max_value: 20.0
+              inclusive: true
+      - name: alone_passengers
+        description: "Number of passengers traveling alone in this segment"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1000
+              inclusive: true
+      - name: alone_percentage
+        description: "Percentage of passengers traveling alone in this segment"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0.0
+              max_value: 100.0
+              inclusive: true
+
+  - name: titanic_one_big_table
+    description: "Comprehensive denormalized table combining all Titanic data for analytics and GPT queries"
+    meta:
+      owner: "data-engineering-team"
+      priority: "critical"
+      refresh_frequency: "daily"
+      business_logic: "Single source of truth for all Titanic data with enriched analytical fields"
+      gpt_enabled: true
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "passenger_id IS NOT NULL"
+          config:
+            severity: error
+    columns:
+      - name: journey_key
+        description: "Unique identifier for each passenger journey"
+        tests:
+          - unique
+          - not_null
+      - name: passenger_id
+        description: "Original passenger ID from the Titanic manifest"
+        tests:
+          - unique
+          - not_null
+      - name: passenger_name
+        description: "Full passenger name including title"
+        tests:
+          - not_null
+      - name: gender
+        description: "Passenger gender (male/female)"
+        tests:
+          - accepted_values:
+              values: ['male', 'female']
+      - name: age
+        description: "Passenger age in years"
+      - name: age_group
+        description: "Age categorization from passenger dimension"
+        tests:
+          - accepted_values:
+              values: ['Child', 'Adult', 'Senior', 'Unknown']
+      - name: detailed_age_group
+        description: "More detailed age categorization (Child, Young Adult, Adult, Senior, Unknown)"
+        tests:
+          - accepted_values:
+              values: ['Child', 'Young Adult', 'Adult', 'Senior', 'Unknown']
+      - name: family_size_category
+        description: "Family size grouping for easy analysis"
+        tests:
+          - accepted_values:
+              values: ['Traveling Alone', 'Small Family', 'Large Family', 'Very Large Family']
+      - name: survival_status
+        description: "Human-readable survival outcome"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Survived', 'Did Not Survive']
+      - name: socioeconomic_class
+        description: "Derived socioeconomic status based on class and fare"
+        tests:
+          - accepted_values:
+              values: ['Wealthy Elite', 'Upper Class', 'Middle Class', 'Working Class', 'Lower Class']
+      - name: embarkation_region
+        description: "Geographic region of embarkation"
+        tests:
+          - accepted_values:
+              values: ['British Isles', 'Continental Europe', 'Unknown Region']
+      - name: deck_category
+        description: "Simplified deck categorization"
+        tests:
+          - accepted_values:
+              values: ['Upper Decks', 'Middle Decks', 'Lower Decks', 'Tank Top', 'Unknown Deck']
+      - name: survival_probability_category
+        description: "Predicted survival probability based on historical factors"
+        tests:
+          - accepted_values:
+              values: ['High Survival Probability', 'Medium-High Survival Probability', 'Medium Survival Probability', 'Low Survival Probability']
+      - name: schema_version
+        description: "Data schema version for tracking changes"
+        tests:
+          - not_null 

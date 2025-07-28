@@ -261,3 +261,14 @@ streamlit==1.41.0
 plotly==5.24.1
 seaborn==0.13.2
 matplotlib==3.10.3
+
+# GPT Interface dependencies
+openai==1.67.0
+
+# Data Catalogue dependencies  
+networkx==3.4.2
+PyYAML==6.0.2
+
+# dbt Testing dependencies
+dbt-utils==1.1.1
+elementary-data==0.15.1

@@ -1,0 +1,102 @@
+version: 2
+
+models:
+  - name: fact_passenger_journey
+    description: "Central fact table capturing each passenger's journey on the Titanic with survival outcome"
+    meta:
+      owner: "data-engineering-team"
+      priority: "critical"
+      grain: "One record per passenger"
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "passenger_key IS NOT NULL"
+          config:
+            severity: error
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - passenger_key
+          config:
+            severity: error
+    columns:
+      - name: journey_key
+        description: "Surrogate key for the passenger journey fact"
+        tests:
+          - unique
+          - not_null
+      - name: passenger_key
+        description: "Foreign key to passenger dimension"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_passenger')
+              field: passenger_key
+      - name: passenger_class_key
+        description: "Foreign key to passenger class dimension"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_passenger_class')
+              field: passenger_class_key
+      - name: embarkation_key
+        description: "Foreign key to embarkation dimension"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_embarkation')
+              field: embarkation_key
+      - name: cabin_key
+        description: "Foreign key to cabin dimension"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_cabin')
+              field: cabin_key
+      - name: ticket_key
+        description: "Foreign key to ticket dimension"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_ticket')
+              field: ticket_key
+      - name: fare_amount
+        description: "Ticket fare amount in pounds sterling"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1000
+              inclusive: true
+      - name: age
+        description: "Passenger age in years"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 120
+              inclusive: true
+      - name: family_size
+        description: "Total family size (siblings_spouses + parents_children + 1)"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 1
+              max_value: 20
+              inclusive: true
+      - name: survived_flag
+        description: "Survival outcome (1 = survived, 0 = did not survive)"
+        tests:
+          - not_null
+          - accepted_values:
+              values: [0, 1]
+      - name: survival_rate
+        description: "Survival rate as decimal (0.0 or 1.0 for individual passengers)"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0.0
+              max_value: 1.0
+              inclusive: true
+      - name: is_alone_flag
+        description: "Boolean flag indicating if passenger is traveling alone (1 = alone, 0 = with family)"
+        tests:
+          - not_null
+          - accepted_values:
+              values: [0, 1] 

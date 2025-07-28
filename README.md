@@ -1,14 +1,16 @@
 # Imad's Data Engineering Portfolio
 
-A comprehensive data engineering project demonstrating modern data stack implementation with **dbt**, **Apache Airflow**, **BigQuery**, and **astronomer-cosmos** for orchestrating dimensional modeling workflows.
+A comprehensive data engineering project demonstrating modern data stack implementation with **dbt**, **Apache Airflow**, **BigQuery**, and **astronomer-cosmos**, plus interactive applications for data visualization and ML model serving.
 
 ## 🏗️ Project Overview
 
-This project showcases a complete data engineering pipeline using the **Titanic dataset** to demonstrate:
+This project showcases a complete data engineering ecosystem using the **Titanic dataset** to demonstrate:
 
 - **Dimensional Modeling** with dbt and BigQuery
 - **Workflow Orchestration** with Apache Airflow and astronomer-cosmos
-- **Data Quality Testing** and documentation
+- **Interactive Data Dashboard** with Streamlit and Plotly
+- **ML Model Training & Serving** with scikit-learn and Flask
+- **Pipeline Monitoring** with real-time Airflow dashboard
 - **Modern Data Stack** best practices
 
 ## 🛠️ Tech Stack
@@ -16,6 +18,8 @@ This project showcases a complete data engineering pipeline using the **Titanic 
 - **Data Warehouse**: Google BigQuery
 - **Transformation**: dbt (data build tool)
 - **Orchestration**: Apache Airflow with astronomer-cosmos
+- **Visualization**: Streamlit, Plotly, Seaborn
+- **ML**: scikit-learn, Flask API
 - **Language**: Python, SQL
 - **Infrastructure**: Local development with cloud data warehouse
 
@@ -23,20 +27,23 @@ This project showcases a complete data engineering pipeline using the **Titanic 
 
 ```
 imad-portfolio/
-├── dbt/core/                    # dbt project for data transformations
+├── apps/                        # Interactive applications
+│   ├── dashboard/              # Streamlit data dashboard
+│   ├── ml_model/               # ML model training & API
+│   └── pipeline_monitor/       # Airflow monitoring dashboard
+├── dbt/core/                   # dbt project for data transformations
 │   ├── models/
-│   │   ├── dimensions/          # Dimension tables (5 tables)
-│   │   ├── facts/              # Fact tables (1 table)
-│   │   └── analytics/          # Analytics views (1 view)
-│   ├── seeds/                  # Raw data (Titanic CSV)
-│   ├── macros/                 # Custom dbt macros
-│   └── profiles.yml            # dbt BigQuery connection
-├── airflow/                    # Airflow orchestration
-│   ├── dags/                   # DAG definitions
-│   ├── config/                 # Airflow configuration
-│   └── start_airflow.sh        # Startup script
-├── scripts/                    # Python utilities
-└── secrets/                    # Service account credentials
+│   │   ├── dimensions/         # Dimension tables (5 tables)
+│   │   ├── facts/             # Fact tables (1 table)
+│   │   └── analytics/         # Analytics views (1 view)
+│   ├── seeds/                 # Raw data (Titanic CSV)
+│   └── profiles.yml           # dbt BigQuery connection
+├── airflow/                   # Airflow orchestration
+│   ├── dags/                  # DAG definitions
+│   ├── start_airflow.sh       # Startup script
+│   └── setup_env.sh           # Environment setup
+├── scripts/                   # Python utilities
+└── secrets/                   # Service account credentials
 ```
 
 ## 📊 Data Model
@@ -62,7 +69,7 @@ The project implements a **star schema** with the Titanic dataset:
 
 ### Prerequisites
 
-- Python 3.8+
+- Python 3.12+ (compatibility fixes included)
 - Google Cloud Platform account with BigQuery enabled
 - Service account with BigQuery permissions
 
@@ -88,47 +95,62 @@ pip install -r requirements.txt
 3. Place it in `secrets/bigquery-service-account.json`
 4. Update `dbt/core/profiles.yml` with your project details
 
-### 3. Start Airflow
+### 3. Start Applications
 
+#### Data Pipeline (Airflow)
 ```bash
-# Start both webserver and scheduler
-./airflow/start_airflow.sh
-
-# Or start individually
-./airflow/start_airflow.sh webserver
-./airflow/start_airflow.sh scheduler
+cd airflow
+./start_airflow.sh standalone
+# Access: http://localhost:8080 (admin/admin)
 ```
 
-### 4. Access Airflow UI
+#### Data Dashboard
+```bash
+cd apps/dashboard
+./run_dashboard.sh
+# Access: http://localhost:8501
+```
 
-- **URL**: http://localhost:8080
-- **Username**: admin
-- **Password**: admin
+#### ML Model API
+```bash
+cd apps/ml_model
+./run_ml_model.sh api
+# Access: http://localhost:5001
+```
 
-### 5. Run the Pipeline
-
-1. Navigate to the Airflow UI
-2. Find the `titanic_dbt_pipeline` DAG
-3. Toggle it ON and trigger a run
+#### Pipeline Monitor
+```bash
+cd apps/pipeline_monitor
+./run_pipeline_monitor.sh
+# Access: http://localhost:8502
+```
 
 ## 🔧 Key Features
 
-### dbt Implementation
-- **Incremental models** for efficient data processing
-- **Custom macros** for reusable transformations
-- **Data quality tests** ensuring data integrity
-- **Documentation** with model descriptions and column definitions
-
-### Airflow Orchestration
-- **Pre-flight checks** for environment validation
-- **dbt task groups** using astronomer-cosmos
+### Data Pipeline (Airflow + dbt)
+- **Automated orchestration** with astronomer-cosmos
+- **Data quality testing** and validation
+- **Dimensional modeling** with star schema
 - **Error handling** and retry mechanisms
-- **Dependency management** between tasks
+- **Python 3.12 compatibility** (Flask, WTForms fixes)
 
-### Data Quality
-- **Source data validation** before processing
-- **Model testing** with dbt tests
-- **Data lineage** tracking through dbt docs
+### Interactive Dashboard
+- **Real-time data visualization** with Plotly
+- **Survival analysis** with interactive filters
+- **Demographic insights** and geographic analysis
+- **Data export** capabilities
+
+### ML Model Serving
+- **Multiple algorithms** (Random Forest, Gradient Boosting, SVM)
+- **Model comparison** and performance metrics
+- **REST API** for predictions
+- **Batch prediction** support
+
+### Pipeline Monitoring
+- **Real-time DAG monitoring** from Airflow database
+- **Task success rates** and performance metrics
+- **Log analysis** and troubleshooting
+- **Auto-refresh** capabilities
 
 ## 📈 Pipeline Workflow
 
@@ -138,8 +160,7 @@ The Airflow DAG (`titanic_dbt_pipeline`) orchestrates:
 2. **Data Seeding** - Load raw Titanic data to BigQuery
 3. **Dimensional Modeling** - Build star schema with dbt
 4. **Data Quality Testing** - Run dbt tests
-5. **Documentation** - Generate dbt docs
-6. **Pipeline Summary** - Log completion status
+5. **Pipeline Summary** - Log completion status
 
 ## 🧪 Available Scripts
 
@@ -161,27 +182,22 @@ The dimensional model enables analysis of:
 - **Cabin location** impact on survival
 - **Family relationships** and survival patterns
 
-## 📚 Documentation
-
-### dbt Documentation
-Generate and view dbt documentation:
-```bash
-cd dbt/core
-dbt docs generate
-dbt docs serve
-```
-
-### Model Lineage
-The dbt docs provide interactive lineage graphs showing data flow from raw data through dimensions to analytics.
-
 ## 🛡️ Data Quality & Testing
 
 - **Source freshness** checks
 - **Referential integrity** tests
 - **Data completeness** validation
 - **Business logic** verification
+- **ML model validation** with cross-validation
 
 ## 🔧 Configuration
+
+### Environment Setup
+Use the provided setup script for consistent environment configuration:
+```bash
+cd airflow
+source setup_env.sh
+```
 
 ### dbt Configuration
 - **`dbt_project.yml`** - Project settings and model configs
@@ -189,41 +205,52 @@ The dbt docs provide interactive lineage graphs showing data flow from raw data 
 - **Model configs** - Materialization strategies and schemas
 
 ### Airflow Configuration
-- **`airflow.cfg`** - Airflow settings optimized for local development
-- **DAG configuration** - Retry policies and scheduling
-- **Connection management** - BigQuery and dbt integrations
+- **`airflow.cfg`** - Optimized for local development
+- **Example DAGs disabled** - Only shows your custom DAG
+- **Proper AIRFLOW_HOME** configuration
 
 ## 🚨 Troubleshooting
 
 ### Common Issues
 
-1. **BigQuery Authentication**
-   - Verify service account permissions
-   - Check file path in profiles.yml
+#### Python 3.12 Compatibility
+- **Flask compatibility** - Fixed with Flask 2.2.5
+- **WTForms compatibility** - Fixed with WTForms 3.2.1
+- **cgi.escape deprecation** - Resolved with proper package versions
 
-2. **Airflow Startup**
-   - Ensure port 8080 is available
-   - Check database initialization
+#### Environment Issues
+- **AIRFLOW_HOME not set** - Use `source setup_env.sh`
+- **DAG not found** - Ensure correct environment variables
+- **BigQuery permissions** - Check service account credentials
 
-3. **dbt Connection**
-   - Run `dbt debug` to verify setup
-   - Validate BigQuery project/dataset names
+#### Port Conflicts
+- **Dashboard**: http://localhost:8501
+- **ML API**: http://localhost:5001
+- **Pipeline Monitor**: http://localhost:8502
+- **Airflow**: http://localhost:8080
 
-## 📊 Performance Considerations
+## 📚 Documentation
 
-- **Incremental models** for large datasets
-- **Partitioning** strategies in BigQuery
-- **Clustering** for query optimization
-- **Resource management** in Airflow
+### dbt Documentation
+```bash
+cd dbt/core
+dbt docs generate
+dbt docs serve
+```
 
-## 🔮 Future Enhancements
+### API Documentation
+- **ML Model API**: http://localhost:5001/health
+- **Model Info**: http://localhost:5001/model/info
+- **Prediction**: POST to http://localhost:5001/predict
 
-- [ ] Add more data sources
-- [ ] Implement data quality monitoring
-- [ ] Add CI/CD pipeline
-- [ ] Containerize with Docker
-- [ ] Add real-time streaming components
-- [ ] Implement data cataloging
+## 🎯 Live Applications
+
+1. **Data Dashboard**: Interactive Titanic analysis with filters and exports
+2. **ML Model API**: Survival prediction service with 80.45% accuracy
+3. **Pipeline Monitor**: Real-time Airflow monitoring and analytics
+4. **Airflow UI**: Complete workflow orchestration and monitoring
+
+This portfolio demonstrates production-ready data engineering practices with modern tools and frameworks, showcasing the complete data lifecycle from ingestion to insights.
 
 ## 🤝 Contributing
 

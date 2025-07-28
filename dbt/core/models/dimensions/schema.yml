@@ -1,0 +1,197 @@
+version: 2
+
+models:
+  - name: dim_passenger
+    description: "Dimension table containing passenger demographic information and personal details"
+    meta:
+      owner: "data-engineering-team"
+      priority: "high"
+      contains_pii: true
+    columns:
+      - name: passenger_key
+        description: "Surrogate key for passenger dimension"
+        tests:
+          - unique
+          - not_null
+      - name: passenger_id
+        description: "Original passenger ID from source system"
+        tests:
+          - unique
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 1
+              max_value: 2000
+      - name: full_name
+        description: "Full passenger name (title, first name, last name)"
+        tests:
+          - not_null
+          - dbt_utils.not_empty_string
+      - name: gender
+        description: "Passenger gender"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['male', 'female']
+      - name: age
+        description: "Passenger age in years at time of boarding"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 120
+              inclusive: true
+      - name: siblings_spouses
+        description: "Number of siblings/spouses aboard Titanic"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 10
+              inclusive: true
+      - name: parents_children
+        description: "Number of parents/children aboard Titanic"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 10
+              inclusive: true
+      - name: family_size
+        description: "Total family size (siblings_spouses + parents_children + 1)"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 1
+              max_value: 20
+              inclusive: true
+      - name: is_alone
+        description: "Boolean flag indicating if passenger is traveling alone"
+        tests:
+          - not_null
+      - name: title
+        description: "Extracted title from passenger name"
+        tests:
+          - not_null
+
+  - name: dim_ticket
+    description: "Dimension table containing ticket information and pricing details"
+    meta:
+      owner: "data-engineering-team"
+      priority: "high"
+    columns:
+      - name: ticket_key
+        description: "Surrogate key for ticket dimension"
+        tests:
+          - unique
+          - not_null
+      - name: ticket_number
+        description: "Original ticket number/identifier"
+        tests:
+          - unique
+          - not_null
+          - dbt_utils.not_empty_string
+      - name: ticket_type
+        description: "Categorized ticket format type"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Prefix Ticket', 'Numeric Ticket', 'Slash Format', 'Dot Format', 'Other Format']
+      - name: is_group_ticket
+        description: "Boolean flag indicating if ticket is shared by multiple passengers"
+        tests:
+          - not_null
+      - name: passengers_on_ticket
+        description: "Number of passengers sharing this ticket"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 1
+              max_value: 20
+              inclusive: true
+
+  - name: dim_passenger_class
+    description: "Dimension table containing passenger class information and associated amenities"
+    meta:
+      owner: "data-engineering-team"
+      priority: "medium"
+    columns:
+      - name: passenger_class_key
+        description: "Surrogate key for passenger class dimension"
+        tests:
+          - unique
+          - not_null
+      - name: class_number
+        description: "Passenger class (1st, 2nd, 3rd)"
+        tests:
+          - unique
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3]
+      - name: class_name
+        description: "Descriptive name for passenger class"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['First Class', 'Second Class', 'Third Class']
+      - name: class_description
+        description: "Detailed description of class amenities and accommodations"
+        tests:
+          - not_null
+          - dbt_utils.not_empty_string
+
+  - name: dim_embarkation
+    description: "Dimension table containing embarkation port information"
+    meta:
+      owner: "data-engineering-team"
+      priority: "medium"
+    columns:
+      - name: embarkation_key
+        description: "Surrogate key for embarkation dimension"
+        tests:
+          - unique
+          - not_null
+      - name: port_code
+        description: "Embarkation port code (C, Q, S, Unknown)"
+        tests:
+          - unique
+          - accepted_values:
+              values: ['C', 'Q', 'S', 'Unknown']
+      - name: port_name
+        description: "Full name of embarkation port"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Cherbourg', 'Queenstown', 'Southampton', 'Unknown']
+      - name: country
+        description: "Country where embarkation port is located"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['France', 'Ireland', 'England', 'Unknown']
+
+  - name: dim_cabin
+    description: "Dimension table containing cabin information and deck details"
+    meta:
+      owner: "data-engineering-team"
+      priority: "medium"
+    columns:
+      - name: cabin_key
+        description: "Surrogate key for cabin dimension"
+        tests:
+          - unique
+          - not_null
+      - name: cabin_number
+        description: "Original cabin number/identifier"
+        tests:
+          - unique
+      - name: deck_letter
+        description: "Deck letter extracted from cabin (A-G, T, Unknown)"
+        tests:
+          - accepted_values:
+              values: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'T', 'Unknown']
+      - name: deck_name
+        description: "Description of deck characteristics and passenger class association"
+        tests:
+          - not_null
+          - dbt_utils.not_empty_string
+      - name: has_cabin
+        description: "Boolean flag indicating if cabin information is known"
+        tests:
+          - not_null 
